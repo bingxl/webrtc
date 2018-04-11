@@ -22,20 +22,12 @@ function handleSuccess(stream) {
   let audioTracks = stream.getAudioTracks();
   console.log('Got stream with constraints:', constraints);
   window.stream = stream; // make variable available to browser console
-  yourVideo.srcObject = stream;
+  yourVideo.srcObject = stream; //add the stream to local video to show;
   startPeerConnection(stream);
 }
 
 function handleError(error) {
-  if (error.name === 'ConstraintNotSatisfiedError') {
-    errorMsg('The resolution ' + constraints.video.width.exact + 'x' +
-        constraints.video.width.exact + ' px is not supported by your device.');
-  } else if (error.name === 'PermissionDeniedError') {
-    errorMsg('Permissions have not been granted to use your camera and ' +
-      'microphone, you need to allow the page access to your devices in ' +
-      'order for the demo to work.');
-  }
-  errorMsg('getUserMedia error: ' + error.name, error);
+  console.error(error);
 }
 
 function startPeerConnection(stream) {

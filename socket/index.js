@@ -99,7 +99,7 @@ wss.on(
 )
 
 wss.on("listening", () => {
-    console.log("Server started in: localhost:",config.port);
+    console.log("Server started in: localhost:8888");
 })
 function receive(message) {
     try {

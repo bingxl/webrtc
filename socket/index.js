@@ -23,6 +23,7 @@ let doaction = {
                 type: 'login',
                 success: true
             });
+
         }
     },
     close(){
@@ -42,6 +43,7 @@ let doaction = {
         let tmpConn = users[data.name];
         if(tmpConn != null) {
             cnn.otherName = data.name;
+            tmpConn.otherName = cnn.name;
             sendTo({type:"offer", offer: data.offer, name: cnn.name}, tmpConn);
         }
     },
@@ -82,7 +84,7 @@ wss.on(
     connection => {
         console.log("user connected");
         cnn = connection;
-        connection.on("message", recive);
+        connection.on("message", receive);
         connection.on("close", doaction.close);
     }
 )
@@ -90,7 +92,7 @@ wss.on(
 wss.on("listening", () => {
     console.log("Server started in: localhost:",config.port);
 })
-function recive(message) {
+function receive(message) {
     try {
         data = JSON.parse(message);
     } catch (e) {

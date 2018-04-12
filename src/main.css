@@ -1,13 +1,14 @@
 body {
   background-color: #3d6df2;
   margin-top: 15px;
+  color: white;
 }
 
 video {
   background-color: black;
   border: 1px solid gray;
 }
-#container {
+#ppage {
   position: relative;
   display: block;
   margin: 0 auto;

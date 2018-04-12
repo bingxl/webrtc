@@ -1,31 +1,31 @@
 <!DOCTYPE html>
-<!--
- *  Copyright (c) 2015 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
--->
 <html>
 <head>
 
   <meta charset="utf-8">
-  <link rel="stylesheet" href="./main.css">
+  <title>webRTC perrconnection</title>
+  <link rel="stylesheet" href="./src/main.css">
 </head>
 
 <body>
 
-  <div id="container">
+  <article id="login-page" class="page">
+    <h2>Login as</h2>
+    <input type="text" name="" id="username">
+    <button id="login">Login</button> 
+  </article>
 
-    <video id="yours" autoplay playsinline></video>
+  <article id="call-page" class="page">
+
+    <video id="yours" autoplay></video>
     <video id="theirs" autoplay></video>
-    
-    <div id="errorMsg"></div>
+    <input type="text" name="" id="their-username">
+    <button id="call">call</button>
+    <button id="hang-up">hang up</button>
+  </article>
 
-    <p class="warning"><strong>Warning:</strong> if you're not using headphones, pressing play will cause feedback.</p>
-  </div>
-
-  <script src="./src/adapter.js"></script>
+  <!-- <script src="./src/adapter.js"></script> -->
+  <!-- <script src="./src/socket.js"></script> -->
   <script src="./src/main.js"></script>
 
 </body>

@@ -45,7 +45,7 @@ let receiveHandle = {
 let socket = {
   init() {
     let config = {
-      url: `wss://115.159.27.129`,
+      url: `wss://cloud.bingxl.cn`,
       port: 8888
     };
     connection = new WebSocket(`${config.url}:${config.port}`);

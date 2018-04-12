@@ -1,18 +1,16 @@
-let https = require("https");
+// let https = require("https");
 let WebSocketServer = require('ws').Server;
 let fs = require("fs");
 let keypath = '/etc/pki/nginx/private/server.key';
 let certpath = '/etc/pki/nginx/server.crt';
 let options = {
-    key: fs.readFileSync(keypath),
-    cert: fs.readFileSync(certpath),
+    ssl: true,
+    port: 8888,
+    ssl_key: fs.readFileSync(keypath),
+    ssl_cert: fs.readFileSync(certpath)
 };
-let server = https.createServer(options,(req, res) => {
-    res.writeHead(403);
-    res.end("this is a websocket server \n");
-}).listen(8888);
 
-let wss = new WebSocketServer({server: server});
+let wss = new WebSocketServer(options);
 let cnn; // 
 let users = {}; // store login user
 let data;

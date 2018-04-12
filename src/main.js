@@ -45,7 +45,7 @@ let receiveHandle = {
 let socket = {
   init() {
     let config = {
-      url: `wss://${window.location.hostname}`,
+      url: `wss://115.159.27.129`,
       port: 8888
     };
     connection = new WebSocket(`${config.url}:${config.port}`);

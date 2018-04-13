@@ -44,7 +44,7 @@ let doaction = {
 
         if (cnn.otherName) {
             let otherCnn = users[cnn.otherName];
-            otherCnn.otherName = null;
+            otherCnn.otherName ? (otherCnn.otherName = null) : '';
             sendTo({ type: 'leave' }, otherCnn);
         }
     },

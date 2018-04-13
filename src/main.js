@@ -3,43 +3,45 @@ let connection, name, connectedUser, data;
 
 // handle receive message
 let receiveHandle = {
-    login() {
-        if(data.success === false) {
-            alert("Login unsuccess,please try a different name");
-        } else {
-            loginPage.style.display = "none";
-            callPage.style.display = "block";
-            startConnection();
-        }
-    },
-    offer(offer=data.offer, name=data.name) {
-      trace("receive offer", data);
-      connectedUser = name;
-      yourConnection.setRemoteDescription(offer);
-      yourConnection.createAnswer()
-        .then(answer => {
-          yourConnection.setLocalDescription(answer);
-          socket.send({type: 'answer', answer: answer, name: connectedUser});
-        })
-        .catch(err => {
-          trace("error to create answer");
-        });
-      
-      
-    },
-    answer(answer = data.answer) {
-      yourConnection.setRemoteDescription(answer);
-    },
-    candidate(candidate=data.candidate) {
-      yourConnection.addIceCandidate(new RTCIceCandidate(candidate));
-    },
-    leave() {
-      connectedUser = null;
-      theirVideo.srcObject = null;
-      yourConnection.close();
-      yourConnection.onicecandidate = null;
-      yourConnection.ontrack = null;setupPeerConnection(stream);
+  login() {
+    if (data.success === false) {
+      alert("Login unsuccess,please try a different name");
+    } else {
+      loginPage.style.display = "none";
+      callPage.style.display = "block";
+      startConnection();
     }
+  },
+  offer(offer = data.offer, name = data.name) {
+    trace("receive offer", data);
+    connectedUser = name;
+    yourConnection.setRemoteDescription(offer);
+    yourConnection.createAnswer()
+      .then(answer => {
+        yourConnection.setLocalDescription(answer);
+        socket.send({ type: 'answer', answer: answer, name: connectedUser });
+      })
+      .catch(err => {
+        trace("error to create answer");
+      });
+
+
+  },
+  answer(answer = data.answer) {
+    yourConnection.setRemoteDescription(answer);
+
+  },
+  candidate(candidate = data.candidate) {
+    yourConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    addTrack();
+  },
+  leave() {
+    connectedUser = null;
+    theirVideo.srcObject = null;
+    yourConnection.close();
+    yourConnection.onicecandidate = null;
+    yourConnection.ontrack = null; setupPeerConnection(stream);
+  }
 };
 
 let socket = {
@@ -50,23 +52,23 @@ let socket = {
     };
     connection = new WebSocket(`${config.url}:${config.port}`);
     connection.onopen = () => {
-        trace("websocket connected");
+      trace("websocket connected");
     };
 
     connection.onmessage = message => {
-        trace(`got message ${message.data}`);
-        data = JSON.parse(message.data);
-        (data.type in receiveHandle) ? receiveHandle[data.type]() : '';
+      trace(`got message ${message.data}`);
+      data = JSON.parse(message.data);
+      (data.type in receiveHandle) ? receiveHandle[data.type]() : '';
 
     };
 
     connection.onerror = err => {
-        trace(`got error ${err}`);
+      trace(`got error ${err}`);
     };
   },
   send(msg) {
-    if(connectedUser) {
-        msg.name = connectedUser;
+    if (connectedUser) {
+      msg.name = connectedUser;
     }
     connection.send(JSON.stringify(msg));
   },
@@ -89,8 +91,8 @@ callPage.style.display = "none";
 loginButton.addEventListener("click", event => {
   name = usernameInput.value;
 
-  if(name.length > 0) {
-    socket.send({type: 'login', name: name});
+  if (name.length > 0) {
+    socket.send({ type: 'login', name: name });
   } else {
     trace("send login is error, username is null");
   }
@@ -99,7 +101,7 @@ loginButton.addEventListener("click", event => {
 callButton.addEventListener('click', () => {
   trace("call button handle");
   let theirUsername = theirUsernameInput.value;
-  if(theirUsername.length > 0) {
+  if (theirUsername.length > 0) {
     startPeerConnection(theirUsername);
   } else {
     trace('theirUserName in null');
@@ -107,7 +109,7 @@ callButton.addEventListener('click', () => {
 });
 
 hangUpButton.addEventListener('click', () => {
-  socket.send({type: 'leave'});
+  socket.send({ type: 'leave' });
   receiveHandle.leave();
 })
 
@@ -136,7 +138,7 @@ function startConnection() {
 
 
 function handleSuccess(stream) {
-//   var videoTracks = stream.getVideoTracks();
+  //   var videoTracks = stream.getVideoTracks();
   let audioTracks = stream.getAudioTracks();
   trace('Got stream with constraints:', constraints);
   window.stream = stream; // make variable available to browser console
@@ -149,22 +151,19 @@ function handleError(error) {
 }
 
 function setupPeerConnection(stream) {
-  let configuration ={
-    "iceServers": [{"url": "stun:61.141.200.149:11480"}]
+  let configuration = {
+    "iceServers": [{ "url": "stun:61.141.200.149:11480" }]
   };
   yourConnection = new RTCPeerConnection(configuration);
-   // add track to local peerconnection
-  stream.getTracks().forEach(track => {
-    yourConnection.addTrack(track, stream);
-  });
 
   yourConnection.ontrack = e => {
     theirVideo.srcObject = e.stream;;
   };
 
   yourConnection.onicecandidate = event => {
-    if(event.candidate) {
-      socket.send({type: 'candidate', candidate: event.candidate});
+    trace('icecandidate');
+    if (event.candidate) {
+      socket.send({ type: 'candidate', candidate: event.candidate });
     }
   }
 }
@@ -176,21 +175,30 @@ function startPeerConnection(user) {
   // strart to offer
   yourConnection.createOffer(offerOptions)
     .then(offer => {
-      socket.send({type: 'offer', offer: offer});
+      trace('create offer success');
+      socket.send({ type: 'offer', offer: offer });
       yourConnection.setLocalDescription(offer);
     })
-    .catch(e =>{
+    .catch(e => {
       trace("error to create offer", offer);
     })
 
 }
 
+function addTrack() {
+   // add track to local peerconnection
+  stream.getTracks().forEach(track => {
+    yourConnection.addTrack(track, stream);
+  });
+}
+
+
 
 let info = document.querySelector("#info");
-
+let p = document.createElement('p');
 function trace(...msgs) {
   console.log(msgs);
-  let p = document.createElement('p');
+
   info.appendChild(p);
 
   let dom = '';

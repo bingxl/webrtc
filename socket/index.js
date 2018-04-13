@@ -7,12 +7,12 @@ let options = {
     pfx: fs.readFileSync(pfxpath),
     passphrase: fs.readFileSync(passpath),
 };
-let server = https.createServer(options,(req, res) => {
+let server = https.createServer(options, (req, res) => {
     res.writeHead(200);
     res.end("this is a websocket server \n");
 }).listen(8888);
 
-let wss = new WebSocketServer({server: server});
+let wss = new WebSocketServer({ server: server });
 let cnn; // 
 let users = {}; // store login user
 let data;
@@ -20,47 +20,47 @@ let doaction = {
     login() {
         console.log("user login as " + data.name);
 
-        if(users[data.name]) {
+        if (users[data.name]) {
             sendTo({
                 type: 'login',
                 success: false
             });
         } else {
-            
+
             cnn.name = data.name;
             users[data.name] = cnn;
-            sendTo( {
+            sendTo({
                 type: 'login',
                 success: true
             });
 
         }
     },
-    close(){
-        console.log("close connection: ", data.name );
-        if(users[data.name]) {
+    close() {
+        console.log("close connection: ", data.name);
+        if (users[data.name]) {
             delete users[data.name];
         }
 
-        if(cnn.otherName) {
+        if (cnn.otherName) {
             let otherCnn = users[cnn.otherName];
             otherCnn.otherName = null;
-            sendTo({type: 'leave'}, otherCnn);
+            sendTo({ type: 'leave' }, otherCnn);
         }
     },
-    offer(){
+    offer() {
         console.log("sending offer to", data.name);
         let tmpConn = users[data.name];
-        if(tmpConn != null) {
+        if (tmpConn != null) {
             cnn.otherName = data.name;
-            tmpConn.otherName = cnn.name;
-            sendTo({type:"offer", offer: data.offer, name: cnn.name}, tmpConn);
+            users[data.name].otherName = cnn.name;
+            sendTo({ type: "offer", offer: data.offer, name: cnn.name }, tmpConn);
         }
     },
     answer() {
         console.log("sending answer to: ", data.name);
         let tmpConn = users[data.name];
-        if(tmpConn != null) {
+        if (tmpConn != null) {
             cnn.otherName = data.name;
             sendTo({
                 type: "answer",
@@ -69,20 +69,20 @@ let doaction = {
         }
     },
 
-    candidate(){
+    candidate() {
         console.log("Sending candidateto", data.name);
         let tmpConn = users[data.name];
-        if(tmpConn != null) {
-            sendTo({type: 'candidate', candidate: data.candidate}, tmpConn);
+        if (tmpConn != null) {
+            sendTo({ type: 'candidate', candidate: data.candidate }, tmpConn);
         }
     },
     leave() {
         console.log("Disconnection user from ", data.name);
         let tmpConn = users[data.name];
-        if(tmpConn.otherName) tmpConn.otherName = null;
+        if (tmpConn.otherName) tmpConn.otherName = null;
 
-        if(tmpConn != null) {
-            sendTo({type: 'leave'}, tmpConn);
+        if (tmpConn != null) {
+            sendTo({ type: 'leave' }, tmpConn);
         }
     }
 
@@ -90,7 +90,7 @@ let doaction = {
 }
 // 开始监听
 wss.on(
-    "connection", 
+    "connection",
     connection => {
         console.log("user connected");
         cnn = connection;
@@ -110,14 +110,14 @@ function receive(message) {
         data = {};
     }
 
-    if(data.type in doaction) {
+    if (data.type in doaction) {
         doaction[data.type](); // 执行相关函数
     } else {
-        sendTo({type: 'error', message: 'unrecognized command ' + data.type});
+        sendTo({ type: 'error', message: 'unrecognized command ' + data.type });
     }
 }
 
-function sendTo(message, conn=cnn) {
+function sendTo(message, conn = cnn) {
     conn.send(JSON.stringify(message));
 }
 

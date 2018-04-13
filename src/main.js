@@ -188,7 +188,7 @@ function startPeerConnection(user) {
 
 function addTrack() {
    // add track to local peerconnection
-  stream.getTracks().forEach(track => {
+  window.stream.getTracks().forEach(track => {
     yourConnection.addTrack(track, stream);
   });
 }

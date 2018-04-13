@@ -158,6 +158,7 @@ function setupPeerConnection(stream) {
   yourConnection = new RTCPeerConnection(configuration);
 
   yourConnection.ontrack = e => {
+    trace("triger add track event", e);
     theirVideo.srcObject = e.stream;;
   };
 

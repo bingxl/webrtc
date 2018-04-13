@@ -1,20 +1,18 @@
 let https = require("https");
 let WebSocketServer = require('ws').Server;
 let fs = require("fs");
-let keypath = '/etc/pki/nginx/private/server.key';
-let certpath = '/etc/pki/nginx/server.crt';
+let pfxpath = __dirname + '/cloud.bingxl.cn.pfx';
+let passpath = __dirname + '/keystorePass.txt';
 let options = {
-    key: fs.readFileSync(keypath),
-    cert: fs.readFileSync(certpath),
-    rejectUnauthorized: false,
+    pfx: fs.readFileSync(pfxpath),
+    passphrase: fs.readFileSync(passpath),
 };
 let server = https.createServer(options,(req, res) => {
     res.writeHead(200);
     res.end("this is a websocket server \n");
 }).listen(8888);
 
-// let wss = new WebSocketServer({server: server});
-let wss = new WebSocketServer({port: 8011})
+let wss = new WebSocketServer({server: server});
 let cnn; // 
 let users = {}; // store login user
 let data;

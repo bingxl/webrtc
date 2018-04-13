@@ -34,7 +34,7 @@ let receiveHandle = {
   },
   candidate(candidate = data.candidate) {
     yourConnection.addIceCandidate(new RTCIceCandidate(candidate));
-    addTrack();
+    addStream();
   },
   leave() {
     connectedUser = null;
@@ -157,7 +157,7 @@ function setupPeerConnection(stream) {
   };
   yourConnection = new RTCPeerConnection(configuration);
 
-  yourConnection.ontrack = e => {
+  yourConnection.onaddStream = e => {
     trace("triger add track event", e);
     theirVideo.srcObject = e.stream;;
   };
@@ -187,11 +187,10 @@ function startPeerConnection(user) {
 
 }
 
-function addTrack() {
+function addStream() {
    // add track to local peerconnection
-  window.stream.getTracks().forEach(track => {
-    yourConnection.addTrack(track, stream);
-  });
+   trace("add stream");
+  yourConnection.addStream(window.stream);
 }
 
 

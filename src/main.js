@@ -18,6 +18,7 @@ let receiveHandle = {
     yourConnection.setRemoteDescription(offer);
     yourConnection.createAnswer()
       .then(answer => {
+        trace("success to create answer");
         yourConnection.setLocalDescription(answer);
         socket.send({ type: 'answer', answer: answer, name: connectedUser });
       })

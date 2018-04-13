@@ -193,7 +193,7 @@ function addTrack() {
   if(!hasAddTrack) {
     trace("added track");
     window.stream.getTracks().forEach(track => {
-      yourConnection.addTrack(track, stream);
+      yourConnection.addTrack(track, window.stream);
     });
   } else {
     trace("has oready add track");

@@ -1,18 +1,15 @@
 let WebSocketServer = require('ws').Server;
 let fs = require("fs");
 let https = require('https');
-let tls = require("tls");
 
-let keypath = __dirname + '/server.key';
-let certpath = __dirname + '/server.crt';
+let pfxpath = __dirname + '/cloud.bingxl.cn.pfx';
+let passpath = __dirname + '/keystorePass.txt';
 let options = {
-    hostname: 'cloud.bingxl.cn',
-    key: fs.readFileSync(keypath),
-    cert: fs.readFileSync(certpath),
-    rejectUnauthorized: false
+    pfx: fs.readFileSync(pfxpath),
+    passphrase: fs.readFileSync(passpath),
 };
-let server = tls.createServer(options,(stream) => {
-    stream.write("welecome \n");
-    stream.setEncoding('utf8');
-    stream.pipe(stream);
+let server = https.createServer(options,(req,res) => {
+    res.writeHead(200);
+    res.write("hello SSL in node");
+    res.end();
 }).listen(8888);

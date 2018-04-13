@@ -120,6 +120,7 @@ hangUpButton.addEventListener('click', () => {
 let yourVideo = document.querySelector('#yours');
 let theirVideo = document.querySelector('#theirs');
 let yourConnection, theirConnection, stream;
+let hasAddStream = false;
 
 // Put variables in global scope to make them available to the browser console.
 let constraints = window.constraints = {
@@ -189,8 +190,12 @@ function startPeerConnection(user) {
 
 function addStream() {
    // add track to local peerconnection
-   trace("add stream");
-  yourConnection.addStream(window.stream);
+  trace("add stream");
+  if(!hasAddStream) {
+    yourConnection.addStream(window.stream);
+    hasAddStream = true;
+  }
+  
 }
 
 

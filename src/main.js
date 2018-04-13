@@ -13,7 +13,7 @@ let receiveHandle = {
         }
     },
     offer(offer=data.offer, name=data.name) {
-      console.log("receive offer", data);
+      trace("receive offer", data);
       connectedUser = name;
       yourConnection.setRemoteDescription(offer);
       yourConnection.createAnswer()
@@ -22,7 +22,7 @@ let receiveHandle = {
           socket.send({type: 'answer', answer: answer, name: connectedUser});
         })
         .catch(err => {
-          console.log("error to create answer");
+          trace("error to create answer");
         });
       
       
@@ -50,18 +50,18 @@ let socket = {
     };
     connection = new WebSocket(`${config.url}:${config.port}`);
     connection.onopen = () => {
-        console.log("websocket connected");
+        trace("websocket connected");
     };
 
     connection.onmessage = message => {
-        console.log(`got message ${message.data}`);
+        trace(`got message ${message.data}`);
         data = JSON.parse(message.data);
         (data.type in receiveHandle) ? receiveHandle[data.type]() : '';
 
     };
 
     connection.onerror = err => {
-        console.log(`got error ${err}`);
+        trace(`got error ${err}`);
     };
   },
   send(msg) {
@@ -92,17 +92,17 @@ loginButton.addEventListener("click", event => {
   if(name.length > 0) {
     socket.send({type: 'login', name: name});
   } else {
-    console.log("send login is error, username is null");
+    trace("send login is error, username is null");
   }
 });
 
 callButton.addEventListener('click', () => {
-  console.log("call button handle");
+  trace("call button handle");
   let theirUsername = theirUsernameInput.value;
   if(theirUsername.length > 0) {
     startPeerConnection(theirUsername);
   } else {
-    console.log('theirUserName in null');
+    trace('theirUserName in null');
   }
 });
 
@@ -138,7 +138,7 @@ function startConnection() {
 function handleSuccess(stream) {
 //   var videoTracks = stream.getVideoTracks();
   let audioTracks = stream.getAudioTracks();
-  console.log('Got stream with constraints:', constraints);
+  trace('Got stream with constraints:', constraints);
   window.stream = stream; // make variable available to browser console
   yourVideo.srcObject = stream; //add the stream to local video to show;
   setupPeerConnection(stream);
@@ -171,7 +171,7 @@ function setupPeerConnection(stream) {
 
 
 function startPeerConnection(user) {
-  console.log('start PeerConnection function');
+  trace('start PeerConnection function');
   connectedUser = user;
   // strart to offer
   yourConnection.createOffer(offerOptions)
@@ -180,7 +180,22 @@ function startPeerConnection(user) {
       yourConnection.setLocalDescription(offer);
     })
     .catch(e =>{
-      console.log("error to create offer", offer);
+      trace("error to create offer", offer);
     })
 
+}
+
+
+let info = document.querySelector("#info");
+
+function trace(...msgs) {
+  console.log(msgs);
+  let p = document.createElement('p');
+  info.appendChild(p);
+
+  let dom = '';
+  msgs.forEach(msg => {
+    dom += `<span> ${msg} </span>`;
+  });
+  info.lastChild.innerHTML = dom + "<br>";
 }

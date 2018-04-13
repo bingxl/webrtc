@@ -26,8 +26,9 @@ let doaction = {
                 success: false
             });
         } else {
-            users[data.name] = cnn;
+            
             cnn.name = data.name;
+            users[data.name] = cnn;
             sendTo( {
                 type: 'login',
                 success: true
@@ -78,7 +79,7 @@ let doaction = {
     leave() {
         console.log("Disconnection user from ", data.name);
         let tmpConn = users[data.name];
-        tmpConn.otherName = null;
+        if(tmpConn.otherName) tmpConn.otherName = null;
 
         if(tmpConn != null) {
             sendTo({type: 'leave'}, tmpConn);

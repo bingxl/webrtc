@@ -1,18 +1,30 @@
-let https = require("https");
+let env = "dev"; // dev or pro
 let WebSocketServer = require('ws').Server;
-let fs = require("fs");
-let pfxpath = __dirname + '/cloud.bingxl.cn.pfx';
-let passpath = __dirname + '/keystorePass.txt';
-let options = {
-    pfx: fs.readFileSync(pfxpath),
-    passphrase: fs.readFileSync(passpath),
-};
-let server = https.createServer(options, (req, res) => {
-    res.writeHead(200);
-    res.end("this is a websocket server \n");
-}).listen(8888);
 
-let wss = new WebSocketServer({ server: server });
+let init = {
+    dev(){
+        wss = new WebSocketServer({port:8888});
+    },
+    pro() {
+        let https = require("https");
+        let fs = require("fs");
+        let pfxpath = __dirname + '/cloud.bingxl.cn.pfx';
+        let passpath = __dirname + '/keystorePass.txt';
+        let options = {
+            pfx: fs.readFileSync(pfxpath),
+            passphrase: fs.readFileSync(passpath),
+        };
+        let server = https.createServer(options, (req, res) => {
+            res.writeHead(200);
+            res.end("this is a websocket server \n");
+        }).listen(8888);
+
+        let wss = new WebSocketServer({ server: server });
+    }
+};
+
+init[env]();
+
 let cnn; // 
 let users = {}; // store login user
 let data;
@@ -84,8 +96,10 @@ let doaction = {
         if (tmpConn != null) {
             sendTo({ type: 'leave' }, tmpConn);
         }
+    },
+    ok() {
+        sendTo({type: 'ok'}, users[data.name]);
     }
-
 
 }
 // 开始监听

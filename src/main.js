@@ -15,12 +15,17 @@ let receiveHandle = {
   offer(offer = data.offer, othername = data.name) {
     trace("receive offer", data);
     connectedUser = othername;
-    yourConnection.setRemoteDescription(offer);
-    yourConnection.createAnswer()
+    yourConnection.setRemoteDescription(offer)
+      .then(() => {
+        return yourConnection.createAnswer();
+      })
       .then(answer => {
         trace("success to create answer");
-        yourConnection.setLocalDescription(answer);
-        socket.send({ type: 'answer', answer: answer, name: connectedUser });
+        return yourConnection.setLocalDescription(answer);
+
+      })
+      .then(() => {
+        socket.send({ type: 'answer', answer: yourConnection.localDescription, name: connectedUser });
       })
       .catch(err => {
         trace("error to create answer");
@@ -30,11 +35,11 @@ let receiveHandle = {
   },
   answer(answer = data.answer) {
     yourConnection.setRemoteDescription(answer);
-
+    addTrack();
+    socket.send({type: 'ok'});
   },
   candidate(candidate = data.candidate) {
-    yourConnection.addIceCandidate(new RTCIceCandidate(candidate));
-    addTrack();
+    yourConnection.addIceCandidate(candidate);
   },
   leave() {
     connectedUser = null;
@@ -42,13 +47,17 @@ let receiveHandle = {
     yourConnection.close();
     yourConnection.onicecandidate = null;
     yourConnection.ontrack = null; setupPeerConnection(stream);
-  }
+  },
+  ok() {
+    addTrack();
+  },
 };
 
 let socket = {
   init() {
+    let url = (window.hostname == 'cloud.bingxl.cn') ? 'wss://cloud.bingxl.cn' : 'ws://localhost';
     let config = {
-      url: `wss://cloud.bingxl.cn`,
+      url: url,
       port: 8888
     };
     connection = new WebSocket(`${config.url}:${config.port}`);
@@ -120,7 +129,6 @@ hangUpButton.addEventListener('click', () => {
 let yourVideo = document.querySelector('#yours');
 let theirVideo = document.querySelector('#theirs');
 let yourConnection, theirConnection, stream;
-let hasAddTrack = false;
 
 // Put variables in global scope to make them available to the browser console.
 let constraints = window.constraints = {
@@ -134,8 +142,8 @@ let offerOptions = {
 };
 
 function startConnection() {
-  navigator.mediaDevices.getUserMedia(constraints).
-    then(handleSuccess).catch(handleError);
+  navigator.mediaDevices.getUserMedia(constraints)
+    .then(handleSuccess)//.catch(handleError);
 }
 
 
@@ -154,33 +162,35 @@ function handleError(error) {
 
 function setupPeerConnection(stream) {
   let configuration = {
-    "iceServers": [{ "url": "stun:61.141.200.149:11480" }]
+    iceServers: [{ url: "stun:61.141.200.149:11480" }]
   };
   yourConnection = new RTCPeerConnection(configuration);
-
-  yourConnection.ontrack = e => {
-    trace("triger add track event", e);
-    theirVideo.srcObject = e.stream;;
-  };
 
   yourConnection.onicecandidate = event => {
     trace('icecandidate');
     if (event.candidate) {
       socket.send({ type: 'candidate', candidate: event.candidate });
     }
-  }
+  };
+
+  yourConnection.ontrack = e => {
+    trace("triger add track event", e);
+    theirVideo.srcObject = e.stream;;
+  };
+
 }
 
 
 function startPeerConnection(user) {
-  trace('start PeerConnection function');
+  trace('start PeerConnection function to ' + user);
   connectedUser = user;
   // strart to offer
   yourConnection.createOffer(offerOptions)
     .then(offer => {
       trace('create offer success');
-      socket.send({ type: 'offer', offer: offer });
-      yourConnection.setLocalDescription(offer);
+      return (yourConnection.setLocalDescription(offer));
+    }).then(() => {
+      socket.send({ type: 'offer', offer: yourConnection.localDescription });
     })
     .catch(e => {
       trace("error to create offer", offer);
@@ -189,18 +199,12 @@ function startPeerConnection(user) {
 }
 
 function addTrack() {
-   // add track to local peerconnection
-  if(!hasAddTrack) {
-    trace("added track");
-    window.stream.getTracks().forEach(track => {
-      yourConnection.addTrack(track, window.stream);
-    });
-  } else {
-    trace("has oready add track");
+  let stream = window.stream;
+  if (constraints.audio) {
+    yourConnection.addTrack(stream.getAudioTracks()[0], stream);
   }
-  
+  yourConnection.addTrack(stream.getVideoTracks()[0], stream);
 }
-
 
 
 let info = document.querySelector("#info");

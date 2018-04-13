@@ -34,7 +34,7 @@ let receiveHandle = {
   },
   candidate(candidate = data.candidate) {
     yourConnection.addIceCandidate(new RTCIceCandidate(candidate));
-    addStream();
+    addTrack();
   },
   leave() {
     connectedUser = null;
@@ -120,7 +120,7 @@ hangUpButton.addEventListener('click', () => {
 let yourVideo = document.querySelector('#yours');
 let theirVideo = document.querySelector('#theirs');
 let yourConnection, theirConnection, stream;
-let hasAddStream = false;
+let hasAddTrack = false;
 
 // Put variables in global scope to make them available to the browser console.
 let constraints = window.constraints = {
@@ -158,7 +158,7 @@ function setupPeerConnection(stream) {
   };
   yourConnection = new RTCPeerConnection(configuration);
 
-  yourConnection.onaddStream = e => {
+  yourConnection.ontrack = e => {
     trace("triger add track event", e);
     theirVideo.srcObject = e.stream;;
   };
@@ -188,12 +188,15 @@ function startPeerConnection(user) {
 
 }
 
-function addStream() {
+function addTrack() {
    // add track to local peerconnection
-  trace("add stream");
-  if(!hasAddStream) {
-    yourConnection.addStream(window.stream);
-    hasAddStream = true;
+  if(!hasAddTrack) {
+    trace("added track");
+    window.stream.getTracks().forEach(track => {
+      yourConnection.addTrack(track, stream);
+    });
+  } else {
+    trace("has oready add track");
   }
   
 }

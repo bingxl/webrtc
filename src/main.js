@@ -12,9 +12,9 @@ let receiveHandle = {
       startConnection();
     }
   },
-  offer(offer = data.offer, name = data.name) {
+  offer(offer = data.offer, othername = data.name) {
     trace("receive offer", data);
-    connectedUser = name;
+    connectedUser = othername;
     yourConnection.setRemoteDescription(offer);
     yourConnection.createAnswer()
       .then(answer => {

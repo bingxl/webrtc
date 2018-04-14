@@ -1,4 +1,11 @@
 {
+  "name": "webrtc",
+  "version": "1.0.0",
+  "description": "webrtc test code",
+  "main": "index.js",
+  "repository": "git@github.com:bingxl/webrtc.git",
+  "author": "bingxl <2282152858@qq.com>",
+  "license": "MIT",
   "dependencies": {
     "ws": "^5.1.1"
   }

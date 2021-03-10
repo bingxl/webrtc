@@ -1,6 +1,7 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
 import DeviceSelect, { CurrentMediaType } from "./device-select";
+import Recorder from "./recorder";
 
 import "./capture.css";
 
@@ -39,6 +40,9 @@ class CaptureMedia {
         throw err;
       });
     this.displayInHtml();
+  }
+  getStream() {
+    return this.stream;
   }
   // 调用摄像头
   async startCamera() {
@@ -96,20 +100,30 @@ class CaptureMedia {
 
   // 更改设备
   changeDevices(constraints: MediaStreamConstraints) {
+    this.close();
     this.constraints = constraints;
-    this.stream?.getTracks().forEach((track) => {
-      this.stream?.removeTrack(track);
-    });
 
     this.getMedia();
+  }
+
+  close() {
+    console.log(this.stream);
+    this.stream?.getTracks().forEach((track) => {
+      this.stream?.removeTrack(track);
+      console.log(`remove ${track.kind}`);
+    });
   }
 }
 
 export default function Capture() {
   const myVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const capture = new CaptureMedia({ audio: false, video: true }, myVideoRef);
 
+  const [capture] = useState<CaptureMedia>(
+    new CaptureMedia({ audio: false, video: true }, myVideoRef)
+  );
+
+  const [stream, setStream] = useState<MediaStream | null>(capture.getStream());
   const changeDevice = ({ videoinput, audioinput }: CurrentMediaType) => {
     // @TODO 构造 TrackConstraints 传入capture.applyConstraints
     console.log(videoinput);
@@ -118,6 +132,20 @@ export default function Capture() {
       audio: { deviceId: audioinput.deviceId },
     });
   };
+
+  async function getMedia(type: "camera" | "screen") {
+    switch (type) {
+      case "camera": {
+        await capture.startCamera();
+        break;
+      }
+      case "screen": {
+        await capture.startScreen();
+        break;
+      }
+    }
+    setStream(capture.getStream());
+  }
 
   return (
     <div>
@@ -137,10 +165,13 @@ export default function Capture() {
         </section>
       </section>
       <section>
-        <button onClick={() => capture.startCamera()}>捕捉媒体</button>
+        <button onClick={() => getMedia("camera")}>捕捉媒体</button>
         <button onClick={() => capture.takeSnap(canvasRef)}>拍照</button>
-        <button onClick={() => capture.startScreen()}>分享屏幕</button>
+        <button onClick={() => getMedia("screen")}>分享屏幕</button>
+        <button onClick={() => capture.close()}>关闭</button>
       </section>
+
+      {stream !== null && <Recorder stream={stream} />}
     </div>
   );
 }

@@ -40,7 +40,7 @@ export default function Recorder({ stream }: { stream: MediaStream }) {
     }
   }
   return (
-    <section>
+    <div>
       <section className="operation" onClick={buttonHandle}>
         <button className="start">开始</button>
         <button className="stop">停止</button>
@@ -51,6 +51,6 @@ export default function Recorder({ stream }: { stream: MediaStream }) {
       <section className="playvideo">
         <video ref={videoRef} controls></video>
       </section>
-    </section>
+    </div>
   );
 }

@@ -109,6 +109,7 @@ class CaptureMedia {
   close() {
     console.log(this.stream);
     this.stream?.getTracks().forEach((track) => {
+      track.stop();
       this.stream?.removeTrack(track);
       console.log(`remove ${track.kind}`);
     });

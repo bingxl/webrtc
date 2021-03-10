@@ -1,0 +1,16 @@
+.myvideo,
+.othervideo {
+  width: 400px;
+  height: 300px;
+  border: 1px solid blue;
+  display: inline-block;
+}
+
+div > section {
+  display: flex;
+}
+canvas {
+  width: 400px;
+  height: 300px;
+  border: 1px solid blue;
+}
